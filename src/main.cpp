@@ -5,14 +5,12 @@
 #include <GL/glut.h>
 
 #define MAXVERTEXS 30
-#define NPOLYGON 30
 #define PHI 3.141572
 #define ZERO 0.00001;
 
 GLenum doubleBuffer;
 
-struct polygon
-{
+struct polygon {
 	float v[3];
 } pvertex[MAXVERTEXS];
 
@@ -27,6 +25,11 @@ float gAng = 0.0f;
 int nVertices = 0;
 int jaPoligono = 0;
 
+int matrizReflexaoX[2][2] = { { 1, 0 }, { 0, -1 } };
+int matrizReflexaoY[2][2] = { { -1, 0 }, { 0, 1 } };
+int matrizReflexaoOrigem[2][2] = { { 0, 1 }, { 1, 0 } };
+int matrizReflexaoZ[2][2] = { { -1, 0 }, { 0, -1 } };
+
 void circulo(float r, float ang, float pp[3])
 {
 	pp[0] = (float)(r * cos(ang));
@@ -39,11 +42,9 @@ int clipVertex(int x, int y)
 	int i;
 	float d;
 	gVert = -1;
-	for (i = 0; i < NPOLYGON; i++)
-	{
+	for (i = 0; i < nVertices; i++) {
 		d = sqrt(pow((pvertex[i].v[0] - x), 2.0) + pow((pvertex[i].v[1] - y), 2.0));
-		if (d < 3.0)
-		{
+		if (d < 3.0) {
 			gVert = i;
 			break;
 		}
@@ -51,7 +52,7 @@ int clipVertex(int x, int y)
 	return gVert;
 }
 
-void init(void)
+void inicializar(void)
 {
 	int i;
 	//	float ang;
@@ -61,15 +62,18 @@ void init(void)
 	tipoPoligono = GL_POINTS;
 	// tipoPoligono = GL_LINE;
 
-	for (i = 0; i < MAXVERTEXS; i++)
-	{
+	for (i = 0; i < MAXVERTEXS; i++) {
 		pvertex[i].v[0] = 0.0f;
 		pvertex[i].v[1] = 0.0f;
 		pvertex[i].v[2] = 0.0f;
 	}
+
+	// calcula o angulo básico de rotacao 
+	gAng = (2.0f * PHI) / 180.0f;
 }
 
-static void Reshape(int width, int height) {
+static void Reshape(int width, int height)
+{
 	windW = width / 2;
 	windH = height / 2;
 
@@ -84,14 +88,13 @@ static void Reshape(int width, int height) {
 
 static void Key(unsigned char key, int x, int y)
 {
-	switch (key)
-	{
+	switch (key) {
 	case 27:
 		exit(0);
 	}
 }
 
-void coord_line(void)
+void desenhaEixos(void)
 {
 	glLineWidth(1);
 
@@ -112,7 +115,7 @@ void coord_line(void)
 	glEnd();
 }
 
-void PolygonDraw(void)
+void desenhaPoligno(void)
 {
 	int i;
 
@@ -121,24 +124,22 @@ void PolygonDraw(void)
 	glPolygonMode(GL_FRONT_AND_BACK, tipoPoligono);
 
 	glBegin(tipoPoligono);
-	for (i = 0; i < nVertices; i++)
-	{
+	for (i = 0; i < nVertices; i++) {
 		glVertex2fv(pvertex[i].v);
 	}
 	glEnd();
 }
 
-static void Draw(void)
+static void desenhaTela(void)
 {
 	glClearColor(1.0, 1.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	coord_line();
+	desenhaEixos();
 
-	PolygonDraw();
+	desenhaPoligno();
 
-	if (gVert > -1)
-	{
+	if (gVert > -1) {
 		glColor3f(1.0, 0.0, 0.0);
 		glPointSize(3);
 		glBegin(GL_POINTS);
@@ -146,134 +147,110 @@ static void Draw(void)
 		glEnd();
 	}
 
-	if (doubleBuffer)
-	{
+	if (doubleBuffer) {
 		glutSwapBuffers();
 	}
-	else
-	{
+	else {
 		glFlush();
 	}
 }
 
-static void Args(int argc, char **argv)
+static void Args(int argc, char** argv)
 {
 	GLint i;
 
 	doubleBuffer = GL_FALSE;
 
-	for (i = 1; i < argc; i++)
-	{
-		if (strcmp(argv[i], "-sb") == 0)
-		{
+	for (i = 1; i < argc; i++) {
+		if (strcmp(argv[i], "-sb") == 0) {
 			doubleBuffer = GL_FALSE;
 		}
-		else if (strcmp(argv[i], "-db") == 0)
-		{
+		else if (strcmp(argv[i], "-db") == 0) {
 			doubleBuffer = GL_TRUE;
 		}
 	}
 }
 
-void procegVertMenuEvents(int option)
+/////////////// MENU //////////////////
+
+void selecionaOpcaoMenu(int option)
 {
-	switch (option)
-	{
+	switch (option) {
 	case 1:
-		if (tipoPoligono == GL_LINE)
-			tipoPoligono = GL_FILL;
-		else
-			tipoPoligono = GL_LINE;
+		tipoPoligono = tipoPoligono == GL_POINTS ? GL_FILL : GL_LINE;
 		break;
 	case 2:
-		init();
+		inicializar();
 		break;
-
 	case 3:
 		tipoPoligono = GL_LINE_LOOP;
 		jaPoligono = 1;
+		break;
+	case 4 ... 10:
+		gOpera = option;
+		break;
 	}
 	glutPostRedisplay();
 }
 
-void subMenu1Events(int option)
+void criaMenu()
 {
-	// option:  1 - poligono;  2 - triangulo
-	cc = option;
-	glutPostRedisplay();
-}
+	int menu;
 
-void subMenu2Events(int option)
-{
-	//  option:
-	//            1: transla??o
-	//            2: Rota??o
-	//            3: Scalamento
-	//            4: Cisalha
-	gOpera = option;
-	glutPostRedisplay();
-}
-
-void createGLUTMenus()
-{
-	int menu, submenu1, submenu2;
-
-	submenu1 = glutCreateMenu(subMenu1Events);
-	glutAddMenuEntry("Polygon", 1);
-	glutAddMenuEntry("Triangle", 2);
-
-	submenu2 = glutCreateMenu(subMenu2Events);
-	glutAddMenuEntry("Translation", 1);
-	glutAddMenuEntry("Rotation", 2);
-	glutAddMenuEntry("Scale", 3);
-	glutAddMenuEntry("Shear", 4);
-
-	menu = glutCreateMenu(procegVertMenuEvents);
+	menu = glutCreateMenu(selecionaOpcaoMenu);
+	glutAddMenuEntry("Pontos", 1);
 	glutAddMenuEntry("Limpar", 2);
 	glutAddMenuEntry("Gerar poligno", 3);
+	glutAddMenuEntry("Translacao", 4);
+	glutAddMenuEntry("Rotacao", 5);
+	glutAddMenuEntry("Escalar", 6);
+	glutAddMenuEntry("Cisalha", 7);
+	glutAddMenuEntry("EspelhoX", 8);
+	glutAddMenuEntry("EspelhoY", 9);
+	glutAddMenuEntry("EspelhoOrigem", 10);
 
-	glutAddMenuEntry("Wire/Solid", 1);
-	glutAddSubMenu("Polygon Type", submenu1);
-	glutAddSubMenu("Transformation", submenu2);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
-void translate(float dx, float dy)
-{
-	int i;
-	for (i = 0; i < NPOLYGON; i++)
-	{
-		pvertex[i].v[0] += dx;
-		pvertex[i].v[1] += dy;
-	}
-}
+
+
+///////////// OPERAÇÕES /////////////////
 
 void calCentro(void)
 {
 	int i;
 	// computando o centroide
 	gCen[0] = gCen[1] = 0.0f;
-	for (i = 0; i < NPOLYGON; i++)
-	{
+	for (i = 0; i < nVertices; i++) {
 		gCen[0] += pvertex[i].v[0];
 		gCen[1] += pvertex[i].v[1];
 	}
-	gCen[0] /= NPOLYGON;
-	gCen[1] /= NPOLYGON;
+	gCen[0] /= nVertices;
+	gCen[1] /= nVertices;
 }
 
 void translaCentro(int t)
 {
 	int i;
 	// translada para centro
-	for (i = 0; i < NPOLYGON; i++)
-	{
+	for (i = 0; i < nVertices; i++) {
 		pvertex[i].v[0] += (t * gCen[0]);
 		pvertex[i].v[1] += (t * gCen[1]);
 	}
 }
 
-void rotate(float dx, float dy)
+////////////// TRANSFORMAÇÕES //////////////
+
+void translacao(float dx, float dy)
+{
+	int i;
+	for (i = 0; i < nVertices; i++) {
+		pvertex[i].v[0] += dx;
+		pvertex[i].v[1] += dy;
+	}
+}
+
+void rotacao(float dx, float dy)
 {
 	int i;
 	float oo, teta, xy[3];
@@ -296,8 +273,7 @@ void rotate(float dx, float dy)
 		teta = -1.0f * gAng;
 
 	// rota em teta para lado oo
-	for (i = 0; i < NPOLYGON; i++)
-	{
+	for (i = 0; i < nVertices; i++) {
 		xy[0] = pvertex[i].v[0];
 		xy[1] = pvertex[i].v[1];
 		pvertex[i].v[0] = xy[0] * cos(teta) - xy[1] * sin(teta);
@@ -306,7 +282,35 @@ void rotate(float dx, float dy)
 	translaCentro(1);
 }
 
-void scale(float dx, float dy)
+void  espelho(int matrizReflexao[2][2])
+{
+	int i;
+	float xy[3];
+
+	// calculo do angulo
+	// seja vetor do centro para o vertice: vv
+	// dd = (dx, dy) ? o vetor deslocalmento do mouse
+	// o = vv x dd  (produto vetorial)
+	// se o positivo ==> rota antihorario;
+	// se o negativo ==> rota horario
+
+	calCentro();
+	translaCentro(-1);
+
+	// determinando o angulo
+
+
+	// rota em teta para lado oo
+	for (i = 0; i < nVertices; i++) {
+		xy[0] = pvertex[i].v[0];
+		xy[1] = pvertex[i].v[1];
+		pvertex[i].v[0] = (xy[0] * matrizReflexao[0][0]) + (xy[1] * matrizReflexao[0][1]);
+		pvertex[i].v[1] = (xy[0] * matrizReflexao[1][0]) + (xy[1] * matrizReflexao[1][1]);
+	}
+	translaCentro(1);
+}
+
+void escala(float dx, float dy)
 {
 	int i;
 	float sx, sy;
@@ -320,8 +324,8 @@ void scale(float dx, float dy)
 		sx = 1.0f + dx / pvertex[gVert].v[0];
 	if (fabs(pvertex[gVert].v[1]) > 0.01f)
 		sy = 1.0f + dy / pvertex[gVert].v[1];
-	for (i = 0; i < NPOLYGON; i++)
-	{
+
+	for (i = 0; i < nVertices; i++) {
 		pvertex[i].v[0] *= sx;
 		pvertex[i].v[1] *= sy;
 	}
@@ -329,34 +333,27 @@ void scale(float dx, float dy)
 	translaCentro(1);
 }
 
-void shear(float dx, float dy)
+void cisalha(float dx, float dy)
 {
 	int i;
 	float sx, sy, xy[3];
 
-	sx = 0.001f * dx;
-	sy = 0.001f * dy;
-	if (dx > dy)
-	{
-		if (fabs(pvertex[gVert].v[0]) > 0.1f)
-			sx = dx / pvertex[gVert].v[0];
-	}
-	else
-	{
-		if (fabs(pvertex[gVert].v[1]) > 0.1f)
-			sy = dy / pvertex[gVert].v[1];
-	}
+	sx = 0.00000001f * dx;
+	sy = 0.00000001f * dy;
+	if (fabs(pvertex[gVert].v[0]) > 0.1f)
+		sx = dx / pvertex[gVert].v[0];
+	if (fabs(pvertex[gVert].v[1]) > 0.1f)
+		sy = dy / pvertex[gVert].v[1];
 
 	calCentro();
 	translaCentro(-1);
 
 	// rota em teta para lado oo
-	for (i = 0; i < NPOLYGON; i++)
-	{
+	for (i = 0; i < nVertices; i++) {
 		xy[0] = pvertex[i].v[0];
 		xy[1] = pvertex[i].v[1];
-		pvertex[i].v[0] = xy[0] + xy[1] * sx;
-		pvertex[i].v[1] = xy[0] * sy + xy[1];
+		pvertex[i].v[0] = xy[0] + (xy[1] / 2) * sx;
+		pvertex[i].v[1] = xy[1] + (xy[0] / 2) * sy;
 	}
 
 	translaCentro(1);
@@ -366,42 +363,41 @@ void motion(int x, int y)
 {
 	int i;
 	float dx, dy;
-	if (gVert > -1)
-	{
+	if (gVert > -1) {
 		x = x - windW;
 		y = windH - y;
 		dx = x - pvertex[gVert].v[0];
 		dy = y - pvertex[gVert].v[1];
-		switch (gOpera)
-		{
-		case 1:
-			translate(dx, dy);
-			break;
-		case 2:
-			rotate(dx, dy);
-			break;
-		case 3:
-			scale(dx, dy);
-			break;
+		switch (gOpera) {
 		case 4:
-			shear(dx, dy);
+			translacao(dx, dy);
+			break;
+		case 5:
+			rotacao(dx, dy);
+			break;
+		case 6:
+			escala(dx, dy);
+			break;
+		case 7:
+			cisalha(dx, dy);
+			break;
+		case 8 ... 10:
+			espelho(gOpera == 8 ? matrizReflexaoX : (
+				gOpera == 9 ? matrizReflexaoY : matrizReflexaoOrigem));
 			break;
 		}
-		Draw();
+		desenhaTela();
 	}
 }
 
 void mouse(int button, int state, int x, int y)
 {
 
-	if (state == GLUT_UP)
-	{
+	if (state == GLUT_UP) {
 		printf("\n jaPoligono %d ", jaPoligono);
-		gVert = -1;
-		if (button == GLUT_LEFT_BUTTON)
-		{
-			if (jaPoligono == 0)
-			{
+		if (button == GLUT_LEFT_BUTTON) {
+
+			if (jaPoligono == 0) {
 				x = x - windW;
 				y = windH - y;
 				glPointSize(3);
@@ -412,10 +408,8 @@ void mouse(int button, int state, int x, int y)
 			}
 		}
 
-		else if (button == GLUT_RIGHT_BUTTON)
-		{
-			if (nVertices > 0)
-			{
+		else if (button == GLUT_RIGHT_BUTTON) {
+			if (nVertices > 0) {
 				jaPoligono = 1;
 				tipoPoligono = GL_LINE;
 			}
@@ -424,31 +418,31 @@ void mouse(int button, int state, int x, int y)
 	glutPostRedisplay();
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
 	GLenum type;
 
-	glutInit(&argc, argv);
+	glutinicializar(&argc, argv);
 	Args(argc, argv);
 
 	type = GLUT_RGB;
 	type |= (doubleBuffer) ? GLUT_DOUBLE : GLUT_SINGLE;
 
-	glutInitDisplayMode(type);
-	glutInitWindowSize(600, 500);
+	glutinicializarDisplayMode(type);
+	glutinicializarWindowSize(600, 500);
 	glutCreateWindow("Basic Program Using Glut and Gl");
 
-	init();
+	inicializar();
 
 	glutReshapeFunc(Reshape);
 	glutKeyboardFunc(Key);
-	glutDisplayFunc(Draw);
+	glutDisplayFunc(desenhaTela);
 
 	glutMotionFunc(motion);
 	glutMouseFunc(mouse);
 	//	glutIdleFunc(idle);
 
-	createGLUTMenus();
+	criaMenu();
 
 	glutMainLoop();
 
