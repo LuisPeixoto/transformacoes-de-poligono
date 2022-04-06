@@ -1,12 +1,9 @@
 void inicializar(void)
 {
   int i;
-  //	float ang;
-  cc = 1;
   jaPoligono = 0;
   nVertices = 0; // zero pontos
   tipoPoligono = GL_POINTS;
-  // tipoPoligono = GL_LINE;
 
   for (i = 0; i < MAXVERTEXS; i++) {
     pvertex[i].v[0] = 0.0f;

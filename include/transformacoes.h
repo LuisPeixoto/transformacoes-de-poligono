@@ -38,30 +38,34 @@ void rotacao(float dx, float dy) {
   translaCentro(1);
 }
 
-void  espelho(int matrizReflexao[2][2]) {
+void  espelho(int matrizReflexao[2][2], float dx, float dy) {
   int i;
   float xy[3];
-
-  // calculo do angulo
-  // seja vetor do centro para o vertice: vv
-  // dd = (dx, dy) ? o vetor deslocalmento do mouse
-  // o = vv x dd  (produto vetorial)
-  // se o positivo ==> rota antihorario;
-  // se o negativo ==> rota horario
 
   calCentro();
   translaCentro(-1);
 
-  // determinando o angulo
-
-
-  // rota em teta para lado oo
-  for (i = 0; i < nVertices; i++) {
-    xy[0] = pvertex[i].v[0];
-    xy[1] = pvertex[i].v[1];
-    pvertex[i].v[0] = (xy[0] * matrizReflexao[0][0]) + (xy[1] * matrizReflexao[0][1]);
-    pvertex[i].v[1] = (xy[0] * matrizReflexao[1][0]) + (xy[1] * matrizReflexao[1][1]);
+  bool sensibilidadeX = dx > 150.0f || dx < -150.0f;
+  bool sensibilidadeY = dy > 150.0f || dy < -150.0f;
+  if (sensibilidadeX)
+  {
+    for (i = 0; i < nVertices; i++) {
+      xy[0] = pvertex[i].v[0];
+      xy[1] = pvertex[i].v[1];
+      pvertex[i].v[0] = (xy[0] * matrizReflexao[0][0]) + (xy[1] * matrizReflexao[0][1]);
+      pvertex[i].v[1] = (xy[0] * matrizReflexao[1][0]) + (xy[1] * matrizReflexao[1][1]);
+    }
   }
+  if (sensibilidadeY)
+  {
+    for (i = 0; i < nVertices; i++) {
+      xy[0] = pvertex[i].v[0];
+      xy[1] = pvertex[i].v[1];
+      pvertex[i].v[0] = (xy[0] * matrizReflexao[0][0]) + (xy[1] * matrizReflexao[0][1]);
+      pvertex[i].v[1] = (xy[0] * matrizReflexao[1][0]) + (xy[1] * matrizReflexao[1][1]);
+    }
+  }
+
   translaCentro(1);
 }
 

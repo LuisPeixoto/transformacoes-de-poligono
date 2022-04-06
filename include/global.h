@@ -9,7 +9,6 @@ struct polygon {
 } pvertex[MAXVERTEXS];
 
 int windW, windH;
-int cc;
 int gOpera = 0;
 int tipoPoligono;
 int gVert = -1;

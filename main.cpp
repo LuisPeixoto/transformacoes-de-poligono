@@ -36,7 +36,7 @@ void EscolheTransformacoes(int x, int y)
 			break;
 		case 8 ... 10:
 			espelho(gOpera == 8 ? matrizReflexaoX : (
-				gOpera == 9 ? matrizReflexaoY : matrizReflexaoOrigem));
+				gOpera == 9 ? matrizReflexaoY : matrizReflexaoOrigem), dx, dy);
 			break;
 		}
 		desenhaTela();
@@ -65,7 +65,6 @@ int main(int argc, char** argv)
 
 	glutMotionFunc(EscolheTransformacoes);
 	glutMouseFunc(CriaVertices);
-	//	glutIdleFunc(idle);
 
 	criaMenu();
 
