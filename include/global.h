@@ -6,16 +6,17 @@ GLenum doubleBuffer;
 
 struct polygon {
   float v[3];
-} pvertex[MAXVERTEXS];
+} poligno[MAXVERTEXS];
 
 int windW, windH;
-int gOpera = 0;
+int transformacaoEscolhida = 0;
 int tipoPoligono;
-int gVert = -1;
-float gCen[3];
-float gAng = 0.0f;
+int verticeSelecionado = -1;
+float centroDoPoligono[3];
+float angulo = 0.0f;
+float Matriz[3][3];
 
-int nVertices = 0;
+int quantidadeVertices = 0;
 int jaPoligono = 0;
 
 int matrizReflexaoX[2][2] = { { 1, 0 }, { 0, -1 } };

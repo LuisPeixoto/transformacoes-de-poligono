@@ -2,8 +2,9 @@
 void selecionaOpcaoMenu(int option)
 {
   switch (option) {
-  case 1:
-    tipoPoligono = tipoPoligono == GL_POINTS ? GL_FILL : GL_LINE;
+  case 1: // desenha poligno
+    tipoPoligono = tipoPoligono == GL_POINTS ? GL_FILL : GL_POINTS;
+    jaPoligono = 0;
     break;
   case 2:
     inicializar();
@@ -13,7 +14,7 @@ void selecionaOpcaoMenu(int option)
     jaPoligono = 1;
     break;
   case 4 ... 10:
-    gOpera = option;
+    transformacaoEscolhida = option;
     break;
   }
   glutPostRedisplay();

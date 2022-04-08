@@ -6,40 +6,48 @@
 
 #include "./include/global.h"
 #include "./include/grafico.h"
+#include "./include/matriz.h"
 #include "./include/inicializa.h"
 #include "./include/menu.h"
 #include "./include/operacoes.h"
 #include "./include/transformacoes.h"
 #include "./include/vertices.h"
 
-void EscolheTransformacoes(int x, int y)
-{
-	int i;
-	float dx, dy;
-	if (gVert > -1) {
-		x = x - windW;
-		y = windH - y;
-		dx = x - pvertex[gVert].v[0];
-		dy = y - pvertex[gVert].v[1];
-		switch (gOpera) {
+void EscolheTransformacoes(int posicaoX, int posicaoY)
+// Funcao acionada quando o usuario escolhe um vertice para realizar a transformacao
+{ // x e y posicao do mouse
+	float distanciaVerticeEixoX, distanciaVerticeEixoY;
+
+	if (verticeSelecionado > -1) {
+
+		// Move referencia do mouse para o meio da tela
+		posicaoX = posicaoX - windW;
+		posicaoY = windH - posicaoY;
+
+		// calcula a distancia do vertice selecionado do mouse no eixo X e Y
+		distanciaVerticeEixoX = posicaoX - poligno[verticeSelecionado].v[0];
+		distanciaVerticeEixoY = posicaoY - poligno[verticeSelecionado].v[1];
+
+		// seleciona a transformacao a ser aplicada
+		switch (transformacaoEscolhida) {
 		case 4:
-			translacao(dx, dy);
+			translacao(distanciaVerticeEixoX, distanciaVerticeEixoY);
 			break;
 		case 5:
-			rotacao(dx, dy);
+			rotacao(distanciaVerticeEixoX, distanciaVerticeEixoY);
 			break;
 		case 6:
-			escala(dx, dy);
+			escala(distanciaVerticeEixoX, distanciaVerticeEixoY);
 			break;
 		case 7:
-			cisalha(dx, dy);
+			cisalha(distanciaVerticeEixoX, distanciaVerticeEixoY);
 			break;
 		case 8 ... 10:
-			espelho(gOpera == 8 ? matrizReflexaoX : (
-				gOpera == 9 ? matrizReflexaoY : matrizReflexaoOrigem), dx, dy);
+			espelho(transformacaoEscolhida == 8 ? matrizReflexaoX : (
+				transformacaoEscolhida == 9 ? matrizReflexaoY : matrizReflexaoOrigem), distanciaVerticeEixoX, distanciaVerticeEixoY);
 			break;
 		}
-		desenhaTela();
+		Desenha();
 	}
 }
 
@@ -54,16 +62,22 @@ int main(int argc, char** argv)
 	type |= (doubleBuffer) ? GLUT_DOUBLE : GLUT_SINGLE;
 
 	glutInitDisplayMode(type);
+
+	// Defini o tamanho da janela
 	glutInitWindowSize(600, 500);
+
+	// inicializa a janela
 	glutCreateWindow("Transformacoes");
 
 	inicializar();
 
 	glutReshapeFunc(Reshape);
 	glutKeyboardFunc(Key);
-	glutDisplayFunc(desenhaTela);
+	glutDisplayFunc(Desenha);
 
+	// Funcao usada quando o usuario escolhe um vertice para realizar a transformacao
 	glutMotionFunc(EscolheTransformacoes);
+
 	glutMouseFunc(CriaVertices);
 
 	criaMenu();

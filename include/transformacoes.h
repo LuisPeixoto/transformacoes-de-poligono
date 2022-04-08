@@ -1,118 +1,117 @@
 
-void translacao(float dx, float dy) {
+void translacao(float distanciaVerticeEixoX, float distanciaVerticeEixoY) {
   int i;
-  for (i = 0; i < nVertices; i++) {
-    pvertex[i].v[0] += dx;
-    pvertex[i].v[1] += dy;
+  criarMatrizIndentidade(3, 3);
+
+  Matriz[0][2] = distanciaVerticeEixoX;
+  Matriz[1][2] = distanciaVerticeEixoY;
+
+  for (i = 0; i < quantidadeVertices; i++) {
+    multiplicaMatrizVetor(poligno[i].v);
   }
 }
 
-void rotacao(float dx, float dy) {
+void rotacao(float distanciaVerticeEixoX, float distanciaVerticeEixoY) {
   int i;
   float oo, teta, xy[3];
 
   // calculo do angulo
   // seja vetor do centro para o vertice: vv
-  // dd = (dx, dy) ? o vetor deslocalmento do mouse
+  // dd = (distanciaVerticeEixoX, distanciaVerticeEixoY) ? o vetor deslocalmento do mouse
   // se o negativo ==> rota horario
   // o = vv x dd  (produto vetorial)
   // se o positivo ==> rota antihorario;
 
-  calCentro();
-  translaCentro(-1);
+  calculaCentro(xy);
+  translacao(-1 * xy[0], -1 * xy[1]);
 
   // determinando o angulo
-  oo = pvertex[gVert].v[1] * dx - pvertex[gVert].v[0] * dy;
+  oo = poligno[verticeSelecionado].v[1] * distanciaVerticeEixoX - poligno[verticeSelecionado].v[0] * distanciaVerticeEixoY;
 
-  teta = gAng;
+  teta = angulo;
   if (oo > 0.0f)
-    teta = -1.0f * gAng;
+    teta = -1.0f * angulo;
+
+  criarMatrizIndentidade(3, 3);
+  Matriz[0][0] = cos(teta);    Matriz[0][1] = -sin(teta);
+  Matriz[1][0] = sin(teta);    Matriz[1][1] = cos(teta);
+
+  for (i = 0; i < quantidadeVertices; i++) {
+    multiplicaMatrizVetor(poligno[i].v);
+  }
+  translacao(xy[0], xy[1]);
 
   // rota em teta para lado oo
-  for (i = 0; i < nVertices; i++) {
-    xy[0] = pvertex[i].v[0];
-    xy[1] = pvertex[i].v[1];
-    pvertex[i].v[0] = xy[0] * cos(teta) - xy[1] * sin(teta);
-    pvertex[i].v[1] = xy[0] * sin(teta) + xy[1] * cos(teta);
-  }
-  translaCentro(1);
 }
 
-void  espelho(int matrizReflexao[2][2], float dx, float dy) {
+void  espelho(int matrizReflexao[2][2], float distanciaVerticeEixoX, float distanciaVerticeEixoY) {
   int i;
   float xy[3];
 
-  calCentro();
-  translaCentro(-1);
+  criarMatrizIndentidade(3, 3);
+  Matriz[0][0] = -1.0f;
+  Matriz[1][1] = 1.0f;
 
-  bool sensibilidadeX = dx > 150.0f || dx < -150.0f;
-  bool sensibilidadeY = dy > 150.0f || dy < -150.0f;
-  if (sensibilidadeX)
-  {
-    for (i = 0; i < nVertices; i++) {
-      xy[0] = pvertex[i].v[0];
-      xy[1] = pvertex[i].v[1];
-      pvertex[i].v[0] = (xy[0] * matrizReflexao[0][0]) + (xy[1] * matrizReflexao[0][1]);
-      pvertex[i].v[1] = (xy[0] * matrizReflexao[1][0]) + (xy[1] * matrizReflexao[1][1]);
-    }
-  }
-  if (sensibilidadeY)
-  {
-    for (i = 0; i < nVertices; i++) {
-      xy[0] = pvertex[i].v[0];
-      xy[1] = pvertex[i].v[1];
-      pvertex[i].v[0] = (xy[0] * matrizReflexao[0][0]) + (xy[1] * matrizReflexao[0][1]);
-      pvertex[i].v[1] = (xy[0] * matrizReflexao[1][0]) + (xy[1] * matrizReflexao[1][1]);
-    }
+  calculaCentro(xy);
+  //transladaCentro(-1);
+
+  for (i = 0; i < quantidadeVertices; i++) {
+    multiplicaMatrizVetor(poligno[i].v);
   }
 
-  translaCentro(1);
+
 }
 
-void escala(float dx, float dy) {
+void escala(float distanciaVerticeEixoX, float distanciaVerticeEixoY) {
   int i;
-  float sx, sy;
+  float sx, sy, xy[3];
 
-  calCentro();
-  translaCentro(-1);
+  calculaCentro(xy);
+  transladaCentro(-1);
   // scalando...
 
   sx = sy = 1.0f;
-  if (fabs(pvertex[gVert].v[0]) > 0.01f)
-    sx = 1.0f + dx / pvertex[gVert].v[0];
-  if (fabs(pvertex[gVert].v[1]) > 0.01f)
-    sy = 1.0f + dy / pvertex[gVert].v[1];
+  if (fabs(poligno[verticeSelecionado].v[0]) > 0.01f)
+    sx = 1.0f + distanciaVerticeEixoX / poligno[verticeSelecionado].v[0];
+  if (fabs(poligno[verticeSelecionado].v[1]) > 0.01f)
+    sy = 1.0f + distanciaVerticeEixoY / poligno[verticeSelecionado].v[1];
 
-  for (i = 0; i < nVertices; i++) {
-    pvertex[i].v[0] *= sx;
-    pvertex[i].v[1] *= sy;
+  //criarMatrizIndentidade(3, 3);
+  Matriz[0][0] = sx;
+  Matriz[1][1] = sy;
+
+  for (i = 0; i < quantidadeVertices; i++) {
+    multiplicaMatrizVetor(poligno[i].v);
   }
-
-  translaCentro(1);
+  translacao(xy[0], xy[1]);
 }
 
-void cisalha(float dx, float dy)
+void cisalha(float distanciaVerticeEixoX, float distanciaVerticeEixoY)
 {
   int i;
   float sx, sy, xy[3];
 
-  sx = 0.00000001f * dx;
-  sy = 0.00000001f * dy;
-  if (fabs(pvertex[gVert].v[0]) > 0.1f)
-    sx = dx / pvertex[gVert].v[0];
-  if (fabs(pvertex[gVert].v[1]) > 0.1f)
-    sy = dy / pvertex[gVert].v[1];
+  calculaCentro(xy);
+  transladaCentro(-1);
+  sx = 0.00000001f * distanciaVerticeEixoX;
+  sy = 0.00000001f * distanciaVerticeEixoY;
+  if (distanciaVerticeEixoX > distanciaVerticeEixoY) {
+    if (fabs(poligno[verticeSelecionado].v[0]) > 0.1f)
+      sx = distanciaVerticeEixoX / poligno[verticeSelecionado].v[0];
+  }
+  else {
+    if (fabs(poligno[verticeSelecionado].v[1]) > 0.1f)
+      sy = distanciaVerticeEixoY / poligno[verticeSelecionado].v[1];
 
-  calCentro();
-  translaCentro(-1);
-
-  // rota em teta para lado oo
-  for (i = 0; i < nVertices; i++) {
-    xy[0] = pvertex[i].v[0];
-    xy[1] = pvertex[i].v[1];
-    pvertex[i].v[0] = xy[0] + (xy[1] / 2) * sx;
-    pvertex[i].v[1] = xy[1] + (xy[0] / 2) * sy;
   }
 
-  translaCentro(1);
+
+  //criarMatrizIndentidade(3, 3);
+  Matriz[1][0] = sx;
+  Matriz[0][1] = sy;
+
+  for (i = 0; i < quantidadeVertices; i++) {
+    multiplicaMatrizVetor(poligno[i].v);
+  }
+  translacao(xy[0], xy[1]);
 }

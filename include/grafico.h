@@ -42,13 +42,13 @@ void desenhaPoligno(void)
   glPolygonMode(GL_FRONT_AND_BACK, tipoPoligono);
 
   glBegin(tipoPoligono);
-  for (i = 0; i < nVertices; i++) {
-    glVertex2fv(pvertex[i].v);
+  for (i = 0; i < quantidadeVertices; i++) {
+    glVertex2fv(poligno[i].v);
   }
   glEnd();
 }
 
-static void desenhaTela(void)
+static void Desenha(void)
 {
   glClearColor(1.0, 1.0, 1.0, 0.0);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -57,11 +57,12 @@ static void desenhaTela(void)
 
   desenhaPoligno();
 
-  if (gVert > -1) {
+  if (verticeSelecionado > -1) {
     glColor3f(1.0, 0.0, 0.0);
-    glPointSize(3);
+    glPointSize(10);
+    //Arrow 
     glBegin(GL_POINTS);
-    glVertex2fv(pvertex[gVert].v);
+    glVertex2fv(poligno[verticeSelecionado].v);
     glEnd();
   }
 
