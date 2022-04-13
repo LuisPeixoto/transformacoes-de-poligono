@@ -22,7 +22,6 @@ int jaPoligono = 0;
 int matrizReflexaoX[2][2] = { { 1, 0 }, { 0, -1 } };
 int matrizReflexaoY[2][2] = { { -1, 0 }, { 0, 1 } };
 int matrizReflexaoOrigem[2][2] = { { 0, 1 }, { 1, 0 } };
-int matrizReflexaoZ[2][2] = { { -1, 0 }, { 0, -1 } };
 
 static void Args(int argc, char** argv)
 {
